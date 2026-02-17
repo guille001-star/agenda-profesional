@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Panel Admin - AgendaProfesional</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+      line-height: 1.6;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    h1 {
+      font-size: 2rem;
+      color: #0f172a;
+      margin-bottom: 8px;
+    }
+    .client-selector {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .client-selector input {
+      width: 300px;
+      padding: 10px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+    .stat-card h3 {
+      font-size: 2rem;
+      font-weight: 600;
+      color: #1e3a8a;
+      margin-bottom: 8px;
+    }
+    .stat-card p {
+      color: #64748b;
+      font-size: 0.95rem;
+    }
+    .tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      padding: 10px 20px;
+      background: #e2e8f0;
+      border: none;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: #1e3a8a;
+      color: white;
+    }
+    .tab-content {
+      display: none;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 25px;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    th {
+      color: #334155;
+      font-weight: 600;
+    }
+    tr:hover {
+      background: #f8fafc;
+    }
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-primary {
+      background: #1e3a8a;
+      color: white;
+    }
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+    .btn:hover {
+      opacity: 0.9;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      color: #334155;
+    }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+    .horario-row {
+      display: grid;
+      grid-template-columns: 1fr 80px 120px 120px 100px;
+      gap: 15px;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .horario-row:last-child {
+      border-bottom: none;
+    }
+    .dias-semana {
+      font-weight: 600;
+      color: #0f172a;
+    }
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      color: #64748b;
+      font-size: 0.9rem;
+    }
+    @media (max-width: 768px) {
+      .horario-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+      .horario-row > div {
+        width: 100%;
+      }
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+      td {
+        text-align: right;
+        padding-left: 50%;
+        position: relative;
+      }
+      td:before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        width: 45%;
+        padding-right: 10px;
+        font-weight: 600;
+        color: #334155;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Panel de Administración</h1>
+      <p>Gestión de turnos y horarios profesionales</p>
+    </header>
+
+    <!-- Selector de cliente -->
+    <div class="client-selector">
+      <label for="clienteInput">Nombre del cliente:</label><br>
+      <input type="text" id="clienteInput" placeholder="Ej: Abogado Martínez" value="Estudio Profesional">
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3 id="total">0</h3>
+        <p>Total Turnos</p>
+      </div>
+      <div class="stat-card">
+        <h3 id="confirmados">0</h3>
+        <p>Pendientes</p>
+      </div>
+      <div class="stat-card">
+        <h3 id="hoy">0</h3>
+        <p>Hoy</p>
+      </div>
+      <div class="stat-card">
+        <h3 id="cancelados">0</h3>
+        <p>Cancelados</p>
+      </div>
+    </div>
+
+    <!-- Pestañas -->
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="turnos">Turnos</button>
+      <button class="tab-btn" data-tab="horarios">Horarios</button>
+    </div>
+
+    <!-- Contenido: Turnos -->
+    <div id="tab-turnos" class="tab-content active">
+      <h2>Lista de Turnos</h2>
+      <table id="tabla-turnos">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="7" style="text-align: center;">Cargando turnos...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Contenido: Horarios -->
+    <div id="tab-horarios" class="tab-content">
+      <h2>Configuración de Horarios</h2>
+      <div id="lista-horarios">
+        <!-- Se llenará dinámicamente -->
+      </div>
+      <button id="btn-guardar-horarios" class="btn btn-primary" style="margin-top: 20px;">
+        Guardar Cambios
+      </button>
+    </div>
+
+    <footer>
+      © AgendaProfesional — Sistema de gestión de turnos profesionales
+    </footer>
+  </div>
+
+  <script>
+    // === UTILIDADES ===
+    const dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+    
+    function getClienteParam() {
+      return document.getElementById('clienteInput').value.trim() || "Estudio Profesional";
+    }
+
+    // === CARGAR ESTADÍSTICAS ===
+    async function cargarEstadisticas() {
+      const cliente = getClienteParam();
+      try {
+        const res = await fetch(`/api/admin/estadisticas?cliente=${encodeURIComponent(cliente)}`);
+        const data = await res.json();
+        document.getElementById('total').textContent = data.total || 0;
+        document.getElementById('confirmados').textContent = data.confirmados || 0;
+        document.getElementById('hoy').textContent = data.hoy || 0;
+        document.getElementById('cancelados').textContent = data.cancelados || 0;
+      } catch (e) {
+        console.error('Error al cargar estadísticas:', e);
+      }
+    }
+
+    // === CARGAR TURNOS ===
+    async function cargarTurnos() {
+      const cliente = getClienteParam();
+      try {
+        const res = await fetch(`/api/admin/turnos?cliente=${encodeURIComponent(cliente)}`);
+        const data = await res.json();
+        const tbody = document.querySelector('#tabla-turnos tbody');
+        
+        if (!data.turnos || data.turnos.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No hay turnos registrados</td></tr>';
+          return;
+        }
+        
+        tbody.innerHTML = data.turnos.map(t => `
+          <tr>
+            <td>${t.id}</td>
+            <td>${t.nombre}</td>
+            <td>${t.email}</td>
+            <td>${t.fecha}</td>
+            <td>${t.hora}</td>
+            <td>${t.estado}</td>
+            <td>
+              ${t.estado !== 'cancelado' ? 
+                `<button class="btn btn-danger" onclick="cancelarTurno(${t.id})">Cancelar</button>` : 
+                '<span style="color:#ef4444">Cancelado</span>'
+              }
+            </td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        console.error('Error al cargar turnos:', e);
+      }
+    }
+
+    // === CARGAR HORARIOS ===
+    async function cargarHorarios() {
+      const cliente = getClienteParam();
+      try {
+        const res = await fetch(`/api/admin/horarios?cliente=${encodeURIComponent(cliente)}`);
+        const data = await res.json();
+        const contenedor = document.getElementById('lista-horarios');
+        
+        if (!data.horarios || data.horarios.length === 0) {
+          contenedor.innerHTML = '<p>No hay configuración de horarios</p>';
+          return;
+        }
+        
+        contenedor.innerHTML = data.horarios.map(h => `
+          <div class="horario-row">
+            <div class="dias-semana">${dias[h.dia_semana - 1]}</div>
+            <div>
+              <label>
+                <input type="checkbox" id="activo-${h.dia_semana}" ${h.activo ? 'checked' : ''}>
+                Activo
+              </label>
+            </div>
+            <div>
+              <input type="time" id="inicio-${h.dia_semana}" value="${h.hora_inicio.substring(0, 5)}">
+            </div>
+            <div>
+              <input type="time" id="fin-${h.dia_semana}" value="${h.hora_fin.substring(0, 5)}">
+            </div>
+            <div>
+              <input type="number" id="intervalo-${h.dia_semana}" value="${h.intervalo}" min="15" max="120" style="width:80px;">
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        console.error('Error al cargar horarios:', e);
+      }
+    }
+
+    // === GUARDAR HORARIOS ===
+    async function guardarHorarios() {
+      const cliente = getClienteParam();
+      const dias = [1, 2, 3, 4, 5, 6, 7];
+      for (const dia of dias) {
+        const activoEl = document.getElementById(`activo-${dia}`);
+        if (!activoEl) continue;
+        
+        const activo = activoEl.checked;
+        const hora_inicio = document.getElementById(`inicio-${dia}`)?.value || '09:00';
+        const hora_fin = document.getElementById(`fin-${dia}`)?.value || '18:00';
+        const intervalo = parseInt(document.getElementById(`intervalo-${dia}`)?.value) || 30;
+        
+        try {
+          await fetch(`/api/admin/horarios/${dia}?cliente=${encodeURIComponent(cliente)}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ hora_inicio, hora_fin, intervalo, activo })
+          });
+        } catch (e) {
+          alert('❌ Error al guardar horario del día ' + dias[dia-1]);
+          return;
+        }
+      }
+      alert('✅ Horarios guardados exitosamente');
+      cargarHorarios();
+    }
+
+    // === CANCELAR TURNO ===
+    async function cancelarTurno(id) {
+      if (!confirm('¿Cancelar este turno?')) return;
+      const cliente = getClienteParam();
+      
+      try {
+        await fetch(`/api/admin/turnos/${id}/cancelar?cliente=${encodeURIComponent(cliente)}`, { method: 'POST' });
+        alert('✅ Turno cancelado');
+        cargarTurnos();
+        cargarEstadisticas();
+      } catch (e) {
+        alert('❌ Error al cancelar');
+      }
+    }
+
+    // === MANEJO DE PESTAÑAS ===
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        const tabId = btn.dataset.tab;
+        document.getElementById(`tab-${tabId}`).classList.add('active');
+        
+        if (tabId === 'turnos') {
+          cargarTurnos();
+          cargarEstadisticas();
+        }
+        if (tabId === 'horarios') {
+          cargarHorarios();
+        }
+      });
+    });
+
+    // === EVENTOS ===
+    document.getElementById('btn-guardar-horarios').addEventListener('click', guardarHorarios);
+
+    // === ACTUALIZACIÓN AUTOMÁTICA ===
+    document.addEventListener('DOMContentLoaded', () => {
+      // Cargar contenido inicial
+      cargarEstadisticas();
+      cargarTurnos();
+
+      // Actualizar estadísticas cada 30 segundos
+      setInterval(cargarEstadisticas, 30000);
+    });
+  </script>
+</body>
+</html>

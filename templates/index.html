@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Agenda tu Turno</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+      line-height: 1.6;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      padding: 30px;
+    }
+    .header-section {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .header-section h1 {
+      font-size: 1.8rem;
+      color: #0f172a;
+      margin-bottom: 8px;
+    }
+    .header-section .subtitle {
+      color: #64748b;
+      font-size: 1.1rem;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      color: #334155;
+    }
+    input, select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      background: #1e3a8a;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #1d4ed8;
+    }
+    .mensaje {
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 16px;
+      text-align: center;
+      font-weight: 500;
+    }
+    .mensaje.success {
+      background: #dcfce7;
+      color: #166534;
+    }
+    .mensaje.error {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+    footer {
+      text-align: center;
+      margin-top: 30px;
+      color: #64748b;
+      font-size: 0.9rem;
+    }
+    .developer-info {
+      margin-top: 12px;
+      font-size: 0.9rem;
+      color: #555;
+      line-height: 1.5;
+    }
+    .developer-info a {
+      color: #1e3a8a;
+      text-decoration: none;
+    }
+    .developer-info a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header-section">
+      <h1 id="professional-title">Estudio Profesional</h1>
+      <p class="subtitle">Agenda tu turno de forma rápida y segura</p>
+    </div>
+    
+    <form id="formTurno">
+      <div class="form-group">
+        <label for="nombre">Nombre completo *</label>
+        <input type="text" id="nombre" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="email">Email *</label>
+        <input type="email" id="email" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="telefono">Teléfono (opcional)</label>
+        <input type="tel" id="telefono">
+      </div>
+      
+      <div class="form-group">
+        <label for="fecha">Fecha *</label>
+        <input type="date" id="fecha" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="hora">Hora *</label>
+        <select id="hora" required>
+          <option value="">Selecciona una hora</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="motivo">Motivo de la consulta (opcional)</label>
+        <input type="text" id="motivo">
+      </div>
+      
+      <button type="submit">Agendar Turno</button>
+    </form>
+    
+    <div id="mensaje"></div>
+    
+    <footer>
+      <p>© 2026 Todos los derechos reservados</p>
+      <div class="developer-info">
+        Guillermo Enrique Oyarzo — Desarrollo de soluciones tecnológicas<br>
+        Sistemas • Automatización • Inteligencia Artificial<br>
+        📱 WhatsApp: <a href="https://wa.me/542804685815" target="_blank">+54 280 468-5815</a> | 
+        📧 <a href="mailto:geopat001@gmail.com">geopat001@gmail.com</a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // === PARÁMETRO DE CLIENTE ===
+    const urlParams = new URLSearchParams(window.location.search);
+    const clienteNombre = urlParams.get('cliente');
+    if (clienteNombre) {
+      const nombreDecodificado = decodeURIComponent(clienteNombre);
+      document.getElementById('professional-title').textContent = nombreDecodificado;
+      document.title = `Agenda - ${nombreDecodificado}`;
+    }
+
+    // === FUNCIONALIDAD DE AGENDAMIENTO ===
+    document.getElementById('fecha').min = new Date().toISOString().split('T')[0];
+    
+    document.getElementById('fecha').addEventListener('change', async function() {
+      const fecha = this.value;
+      if (!fecha) return;
+      
+      let url = `/api/horarios/${fecha}`;
+      if (clienteNombre) {
+        url += `?cliente=${encodeURIComponent(clienteNombre)}`;
+      }
+      
+      const res = await fetch(url);
+      const data = await res.json();
+      
+      const sel = document.getElementById('hora');
+      sel.innerHTML = '<option value="">Selecciona una hora</option>';
+      
+      if (data.horarios && data.horarios.length > 0) {
+        data.horarios.forEach(h => {
+          const opt = document.createElement('option');
+          opt.value = h;
+          opt.textContent = h;
+          sel.appendChild(opt);
+        });
+      } else {
+        const opt = document.createElement('option');
+        opt.value = "";
+        opt.textContent = "No hay horarios disponibles";
+        opt.disabled = true;
+        sel.appendChild(opt);
+      }
+    });
+    
+    document.getElementById('formTurno').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const formData = {
+        nombre: document.getElementById('nombre').value,
+        email: document.getElementById('email').value,
+        telefono: document.getElementById('telefono').value || null,
+        fecha: document.getElementById('fecha').value,
+        hora: document.getElementById('hora').value,
+        motivo: document.getElementById('motivo').value || null
+      };
+      
+      let url = '/api/turnos';
+      if (clienteNombre) {
+        url += `?cliente=${encodeURIComponent(clienteNombre)}`;
+      }
+      
+      const mensajeDiv = document.getElementById('mensaje');
+      mensajeDiv.className = '';
+      mensajeDiv.textContent = 'Agendando...';
+      
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(formData)
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          mensajeDiv.className = 'mensaje success';
+          mensajeDiv.textContent = '✅ ¡Turno agendado exitosamente!';
+          document.getElementById('formTurno').reset();
+          document.getElementById('hora').innerHTML = '<option>Selecciona una hora</option>';
+        } else {
+          mensajeDiv.className = 'mensaje error';
+          mensajeDiv.textContent = '❌ ' + (data.error || 'Error al agendar');
+        }
+      } catch (err) {
+        mensajeDiv.className = 'mensaje error';
+        mensajeDiv.textContent = '❌ Error de conexión';
+      }
+    });
+  </script>
+</body>
+</html>
